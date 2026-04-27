@@ -5,8 +5,8 @@ import { Suspense } from 'react';
 import Navbar from './components/Navbar';
 
 export const metadata = {
-  title: 'NBC News Clone',
-  description: 'NBC News clone built with Next.js',
+  title: 'BeritaKita',
+  description: 'BeritaKita built with Next.js',
 };
 
 export default function RootLayout({ children }) {
