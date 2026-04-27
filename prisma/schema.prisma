@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  THINK
+  HEALTH
+}
+
+model News {
+  id        String    @id @default(uuid())
+  title     String
+  content   String
+  slug      String    @unique
+  imageUrl  String
+  category  Category
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  createdBy String?
+
+  comments  Comment[]
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  newsId      String
+  userName    String
+  commentText String
+  createdAt   DateTime @default(now())
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
