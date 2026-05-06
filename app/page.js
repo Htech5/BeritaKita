@@ -1,13 +1,15 @@
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
-import { Search } from 'lucide-react';
+import { Search, Camera } from 'lucide-react';
 import { Suspense } from 'react';
 
 function NewsSkeleton() {
   return (
     <div className="w-full animate-pulse">
       <div className="mb-12">
-        <div className="w-full h-[60vh] bg-gray-200 rounded mb-4"></div>
+        <div className="w-full h-[60vh] bg-gray-200 rounded mb-4 animate-camera-flash flex items-center justify-center">
+          <Camera className="w-16 h-16 text-gray-400" />
+        </div>
         <div className="w-24 h-6 bg-gray-200 rounded mb-3"></div>
         <div className="w-3/4 h-12 bg-gray-200 rounded mb-4"></div>
         <div className="w-1/2 h-6 bg-gray-200 rounded"></div>
@@ -16,7 +18,9 @@ function NewsSkeleton() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
           <div key={i}>
-            <div className="h-48 bg-gray-200 rounded mb-3"></div>
+            <div className="h-48 bg-gray-200 rounded mb-3 animate-camera-flash flex items-center justify-center">
+              <Camera className="w-8 h-8 text-gray-400" />
+            </div>
             <div className="w-16 h-4 bg-gray-200 rounded mb-2"></div>
             <div className="w-full h-6 bg-gray-200 rounded mb-2"></div>
             <div className="w-3/4 h-6 bg-gray-200 rounded mb-2"></div>
