@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Search, Filter, FileText, Users, LayoutList, Edit, Trash2, Eye, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [news, setNews] = useState([]);
@@ -84,90 +85,325 @@ export default function AdminDashboard() {
     }
   };
 
+  const thinkCount = news.filter(n => n.category === 'THINK').length;
+  const healthCount = news.filter(n => n.category === 'HEALTH').length;
+  const uniqueAuthors = new Set(news.map(n => n.createdBy).filter(Boolean)).size;
+
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-[#001d38]">Admin Dashboard</h1>
-        <div className="space-x-4">
-          <Link href="/admin/trash" className="text-gray-600 hover:underline">Trash Bin</Link>
-          <Link href="/" className="text-blue-600 hover:underline">View Site</Link>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 bg-white p-6 rounded shadow">
-          <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit News' : 'Create News'}</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Title</label>
-              <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full border p-2 rounded" required />
+    <div className="min-h-screen bg-[#f8fafc] font-sans">
+      {/* Top Navigation */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="flex justify-between items-center px-8 py-4">
+          <div className="flex items-center space-x-8">
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">NewsAdmin<span className="text-[#cc0000]">OS</span></h1>
+            <div className="relative hidden md:block">
+              <Search className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search articles, authors, categories..." 
+                className="pl-10 pr-4 py-2 w-96 bg-gray-50 border border-transparent focus:border-gray-200 focus:bg-white rounded-lg text-sm focus:outline-none transition-all"
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full border p-2 rounded">
-                <option value="THINK">THINK</option>
-                <option value="HEALTH">HEALTH</option>
-              </select>
+          </div>
+          <div className="flex items-center space-x-5">
+            <Link href="/" className="text-gray-500 hover:text-[#cc0000] transition flex items-center text-sm font-medium">
+              <Eye className="w-5 h-5 mr-1" />
+              View Site
+            </Link>
+            <Link href="/admin/trash" className="text-gray-500 hover:text-red-600 transition flex items-center text-sm font-medium">
+              <Trash2 className="w-5 h-5 mr-1" />
+              Trash
+            </Link>
+            <div className="h-6 w-px bg-gray-200"></div>
+            
+            <div className="w-9 h-9 bg-[#cc0000] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md cursor-pointer hover:bg-[#a30000] transition">
+              AD
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Upload Image</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full border p-2 rounded" disabled={isUploading} />
-              {isUploading && <p className="text-sm text-blue-500 mt-1">Uploading...</p>}
-              {formData.imageUrl && !isUploading && (
-                <div className="mt-2">
-                  <p className="text-xs text-green-600 mb-1">Image uploaded successfully (or loaded)</p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={formData.imageUrl} alt="Preview" className="h-24 object-cover rounded" />
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Content</label>
-              <textarea value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full border p-2 rounded h-32" required />
-            </div>
-            <button type="submit" className="w-full bg-[#001d38] text-white p-2 rounded hover:bg-blue-900 transition">
-              {isEditing ? 'Update' : 'Create'}
-            </button>
-            {isEditing && (
-              <button type="button" onClick={() => { setIsEditing(false); setFormData({ title: '', content: '', imageUrl: '', category: 'THINK' }); }} className="w-full mt-2 bg-gray-300 p-2 rounded hover:bg-gray-400 transition">
-                Cancel
-              </button>
-            )}
-          </form>
-        </div>
-
-        <div className="md:col-span-2 bg-white p-6 rounded shadow">
-          <h2 className="text-xl font-bold mb-4">Active News</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-2">Title</th>
-                  <th className="p-2">Category</th>
-                  <th className="p-2">Date</th>
-                  <th className="p-2">Created By</th>
-                  <th className="p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {news.map(item => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">{item.title}</td>
-                    <td className="p-2">{item.category}</td>
-                    <td className="p-2">{new Date(item.createdAt).toLocaleDateString()}</td>
-                    <td className="p-2">{item.createdBy || '-'}</td>
-                    <td className="p-2 space-x-2">
-                      <button onClick={() => handleEdit(item)} className="text-blue-600 hover:underline">Edit</button>
-                      <button onClick={() => handleTrash(item.id)} className="text-red-600 hover:underline">Trash</button>
-                    </td>
-                  </tr>
-                ))}
-                {news.length === 0 && <tr><td colSpan="5" className="p-4 text-center text-gray-500">No active news found.</td></tr>}
-              </tbody>
-            </table>
           </div>
         </div>
-      </div>
+      </header>
+
+      <main className="p-8 max-w-[1400px] mx-auto">
+        {/* Filter Bar */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex space-x-3">
+            <select className="border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] cursor-pointer">
+              <option>Last 30 days</option>
+              <option>Last 7 days</option>
+              <option>This Year</option>
+            </select>
+            <select className="border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] cursor-pointer">
+              <option>All Categories</option>
+              <option>THINK</option>
+              <option>HEALTH</option>
+            </select>
+          </div>
+          <button className="border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white text-gray-700 shadow-sm flex items-center hover:bg-gray-50 transition cursor-pointer">
+            <Filter className="w-4 h-4 mr-2 text-gray-500" /> 
+            More Filters
+          </button>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Card 1 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-[#cc0000]" />
+              </div>
+              
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900">{news.length}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Total Articles</p>
+              <p className="text-gray-400 text-sm mt-1">All time</p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+                <LayoutList className="w-6 h-6 text-[#001d38]" />
+              </div>
+              
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900">{thinkCount}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Think Category</p>
+              <p className="text-gray-400 text-sm mt-1">articles published</p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+                <LayoutList className="w-6 h-6 text-[#001d38]" />
+              </div>
+              
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900">{healthCount}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Health Category</p>
+              <p className="text-gray-400 text-sm mt-1">articles published</p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+                <Users className="w-6 h-6 text-[#001d38]" />
+              </div>
+              
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold text-gray-900">{uniqueAuthors || 1}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Active Authors</p>
+              <p className="text-gray-400 text-sm mt-1">contributing writers</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          
+          {/* Form Section */}
+          <div className="xl:col-span-1">
+            <div className="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 p-6 sticky top-24">
+              <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
+                <span className="w-8 h-8 rounded-lg bg-gray-50 text-[#cc0000] flex items-center justify-center mr-3">
+                  <Edit className="w-4 h-4" />
+                </span>
+                {isEditing ? 'Edit Article' : 'Compose Article'}
+              </h2>
+              
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Article Title</label>
+                  <input 
+                    type="text" 
+                    value={formData.title} 
+                    onChange={e => setFormData({...formData, title: e.target.value})} 
+                    className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm" 
+                    placeholder="Enter engaging title..."
+                    required 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                    <select 
+                      value={formData.category} 
+                      onChange={e => setFormData({...formData, category: e.target.value})} 
+                      className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm bg-white"
+                    >
+                      <option value="THINK">THINK</option>
+                      <option value="HEALTH">HEALTH</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
+                    <select className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm bg-white">
+                      <option>Published</option>
+                      <option>Draft</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Cover Image</label>
+                  <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 transition cursor-pointer relative">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageUpload} 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                      disabled={isUploading} 
+                    />
+                    {isUploading ? (
+                      <div className="text-sm text-[#cc0000] font-medium py-2">Uploading image...</div>
+                    ) : (
+                      <div className="text-sm text-gray-500 font-medium py-2">
+                        <span className="text-[#cc0000]">Click to upload</span> or drag and drop
+                      </div>
+                    )}
+                  </div>
+                  
+                  {formData.imageUrl && !isUploading && (
+                    <div className="mt-3 relative rounded-xl overflow-hidden border border-gray-200 group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={formData.imageUrl} alt="Preview" className="w-full h-32 object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-white text-xs font-semibold px-3 py-1 bg-black/50 rounded-full">Cover Preview</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Article Content</label>
+                  <textarea 
+                    value={formData.content} 
+                    onChange={e => setFormData({...formData, content: e.target.value})} 
+                    className="w-full border border-gray-200 px-4 py-3 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm h-40 resize-none" 
+                    placeholder="Write your article content here..."
+                    required 
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <button 
+                    type="submit" 
+                    className="w-full bg-[#cc0000] text-white font-semibold py-3 rounded-xl hover:bg-[#a30000] focus:ring-4 focus:ring-[#001d38]/20 transition-all shadow-md hover:shadow-lg"
+                  >
+                    {isEditing ? 'Save Changes' : 'Publish Article'}
+                  </button>
+                  {isEditing && (
+                    <button 
+                      type="button" 
+                      onClick={() => { setIsEditing(false); setFormData({ title: '', content: '', imageUrl: '', category: 'THINK' }); }} 
+                      className="w-full mt-3 bg-white border border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-all"
+                    >
+                      Cancel Editing
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Table Section */}
+          <div className="xl:col-span-2">
+            <div className="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
+                <h2 className="text-lg font-bold text-gray-900">Recent Articles</h2>
+                <button className="text-sm text-[#cc0000] font-semibold hover:text-[#a30000] transition">View All</button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50/50">
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Article Info</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Author</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {news.map(item => (
+                      <tr key={item.id} className="hover:bg-gray-50/80 transition group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            {item.imageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={item.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover mr-3 border border-gray-100" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-gray-100 mr-3 flex items-center justify-center text-gray-400">
+                                <ImageIcon className="w-5 h-5" />
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-sm font-semibold text-gray-900 line-clamp-1">{item.title}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">ID: #{item.id.substring(0, 8)}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${item.category === 'THINK' ? 'bg-gray-50 text-[#001d38]' : 'bg-gray-50 text-[#cc0000]'}`}>
+                            {item.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-700 font-medium">{item.createdBy || 'System Admin'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleEdit(item)} 
+                              className="p-1.5 text-[#001d38] bg-gray-50 hover:bg-gray-200 rounded-lg transition"
+                              title="Edit Article"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleTrash(item.id)} 
+                              className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition"
+                              title="Move to Trash"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {news.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center justify-center text-gray-400">
+                            <FileText className="w-12 h-12 mb-3 text-gray-300" />
+                            <p className="text-base font-medium text-gray-900">No articles found</p>
+                            <p className="text-sm mt-1">Get started by creating a new article.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
     </div>
   );
 }
