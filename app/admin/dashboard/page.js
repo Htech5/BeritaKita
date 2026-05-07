@@ -27,9 +27,7 @@ export default function AdminDashboard() {
 
   const fetchNews = async () => {
     try {
-      const res = await fetch("/api/news", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/news");
 
       if (!res.ok) {
         throw new Error("Failed to fetch news");
@@ -99,22 +97,6 @@ export default function AdminDashboard() {
 
     if (!file) return;
 
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-
-    if (!allowedTypes.includes(file.type)) {
-      alert("File harus berupa gambar JPG, PNG, atau WEBP");
-      e.target.value = "";
-      return;
-    }
-
-    const maxSize = 5 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-      alert("Ukuran gambar maksimal 5MB");
-      e.target.value = "";
-      return;
-    }
-
     setIsUploading(true);
 
     const data = new FormData();
@@ -126,31 +108,19 @@ export default function AdminDashboard() {
         body: data,
       });
 
-      const text = await res.text();
+      const json = await res.json();
 
-      let json;
-
-      try {
-        json = JSON.parse(text);
-      } catch {
-        throw new Error(text || "Server tidak mengembalikan JSON");
+      if (res.ok) {
+        setFormData((prev) => ({
+          ...prev,
+          imageUrl: json.url,
+        }));
+      } else {
+        alert(json.error || "Failed to upload image");
       }
-
-      if (!res.ok) {
-        throw new Error(json.detail || json.error || "Failed to upload image");
-      }
-
-      if (!json.url) {
-        throw new Error("URL gambar tidak ditemukan dari server");
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        imageUrl: json.url,
-      }));
     } catch (error) {
       console.error("Upload error:", error);
-      alert(error.message || "Error uploading image");
+      alert("Error uploading image");
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -394,40 +364,32 @@ export default function AdminDashboard() {
                     Cover Image
                   </label>
 
-                  <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:bg-gray-50 transition cursor-pointer relative">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp"
-                      onChange={handleImageUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isUploading}
-                    />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm bg-white"
+                    disabled={isUploading}
+                  />
 
-                    {isUploading ? (
-                      <div className="text-sm text-[#cc0000] font-medium py-2">
-                        Uploading image...
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500 font-medium py-2">
-                        <span className="text-[#cc0000]">Click to upload</span>
-                      </div>
-                    )}
-                  </div>
+                  {isUploading && (
+                    <p className="text-sm text-[#cc0000] font-medium mt-2">
+                      Uploading image...
+                    </p>
+                  )}
 
                   {formData.imageUrl && !isUploading && (
-                    <div className="mt-3 relative rounded-xl overflow-hidden border border-gray-200 group">
+                    <div className="mt-3">
+                      <p className="text-xs text-green-600 mb-1">
+                        Image uploaded successfully
+                      </p>
+
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={formData.imageUrl}
                         alt="Preview"
-                        className="w-full h-32 object-cover"
+                        className="w-full h-32 object-cover rounded-xl border border-gray-200"
                       />
-
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-semibold px-3 py-1 bg-black/50 rounded-full">
-                          Cover Preview
-                        </span>
-                      </div>
                     </div>
                   )}
                 </div>
