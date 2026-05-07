@@ -1,38 +1,68 @@
-import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
     const data = await request.formData();
-    const file = data.get('file');
+    const file = data.get("file");
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "No file uploaded" },
+        { status: 400 }
+      );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-    // Create a unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = uniqueSuffix + '-' + file.name.replace(/[^a-zA-Z0-9.-]/g, '');
-
-    // Ensure upload directory exists
-    const uploadDir = join(process.cwd(), 'public/uploads');
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, error: "File harus berupa JPG, PNG, atau WEBP" },
+        { status: 400 }
+      );
     }
 
-    const path = join(uploadDir, filename);
-    await writeFile(path, buffer);
+    const maxSize = 4 * 1024 * 1024;
 
-    const fileUrl = `/uploads/${filename}`;
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { success: false, error: "Ukuran gambar maksimal 4MB" },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ url: fileUrl });
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+
+    const safeFileName =
+      file.name
+        ?.replace(/\s+/g, "-")
+        .replace(/[^a-zA-Z0-9.-]/g, "")
+        .toLowerCase() || "image.jpg";
+
+    const filename = `uploads/${uniqueSuffix}-${safeFileName}`;
+
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
+
+    return NextResponse.json({
+      success: true,
+      url: blob.url,
+    });
   } catch (error) {
-    console.error('Error uploading file:', error);
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+    console.error("Error uploading file:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to upload file",
+        detail: error.message,
+      },
+      { status: 500 }
+    );
   }
 }
