@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FileText,
   Users,
@@ -14,9 +15,12 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  const router = useRouter();
+
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState("latest");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -181,20 +185,40 @@ export default function AdminDashboard() {
     });
   };
 
-  const filteredNews = news.filter((item) => {
-    const keyword = searchQuery.toLowerCase();
+  const handleOpenArticle = (item) => {
+    if (!item?.slug) {
+      alert("Slug artikel tidak ditemukan.");
+      return;
+    }
 
-    const matchSearch =
-      item.title?.toLowerCase().includes(keyword) ||
-      item.content?.toLowerCase().includes(keyword) ||
-      item.category?.toLowerCase().includes(keyword) ||
-      item.createdBy?.toLowerCase().includes(keyword);
+    router.push(`/news/${item.slug}`);
+  };
 
-    const matchCategory =
-      categoryFilter === "ALL" || item.category === categoryFilter;
+  const filteredNews = news
+    .filter((item) => {
+      const keyword = searchQuery.toLowerCase();
 
-    return matchSearch && matchCategory;
-  });
+      const matchSearch =
+        item.title?.toLowerCase().includes(keyword) ||
+        item.content?.toLowerCase().includes(keyword) ||
+        item.category?.toLowerCase().includes(keyword) ||
+        item.createdBy?.toLowerCase().includes(keyword);
+
+      const matchCategory =
+        categoryFilter === "ALL" || item.category === categoryFilter;
+
+      return matchSearch && matchCategory;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+
+      if (sortOrder === "latest") {
+        return dateB - dateA;
+      }
+
+      return dateA - dateB;
+    });
 
   const thinkCount = news.filter((n) => n.category === "THINK").length;
   const healthCount = news.filter((n) => n.category === "HEALTH").length;
@@ -479,12 +503,23 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 bg-white">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <h2 className="text-lg font-bold text-gray-900">
-                    Recent Articles
-                  </h2>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      Recent Articles
+                    </h2>
 
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-full md:w-72">
+                    <p className="text-sm text-gray-500 mt-1">
+                      Showing:{" "}
+                      <span className="font-semibold text-gray-800">
+                        {categoryFilter === "ALL"
+                          ? "All Articles"
+                          : `${categoryFilter} Articles`}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="relative w-full sm:w-72">
                       <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
 
                       <input
@@ -496,25 +531,26 @@ export default function AdminDashboard() {
                       />
                     </div>
 
+                    <select
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm bg-white"
+                    >
+                      <option value="latest">Latest</option>
+                      <option value="oldest">Oldest</option>
+                    </select>
+
                     {categoryFilter !== "ALL" && (
                       <button
+                        type="button"
                         onClick={() => setCategoryFilter("ALL")}
-                        className="text-sm font-semibold text-[#cc0000] hover:underline"
+                        className="text-sm font-semibold text-[#cc0000] hover:underline whitespace-nowrap"
                       >
                         Reset Filter
                       </button>
                     )}
                   </div>
                 </div>
-
-                <p className="text-sm text-gray-500 mt-2">
-                  Showing:{" "}
-                  <span className="font-semibold text-gray-800">
-                    {categoryFilter === "ALL"
-                      ? "All Articles"
-                      : `${categoryFilter} Articles`}
-                  </span>
-                </p>
               </div>
 
               <div className="overflow-x-auto">
@@ -543,7 +579,8 @@ export default function AdminDashboard() {
                     {filteredNews.map((item) => (
                       <tr
                         key={item.id}
-                        className="hover:bg-gray-50/80 transition group"
+                        onClick={() => handleOpenArticle(item)}
+                        className="hover:bg-gray-50/80 transition group cursor-pointer"
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
@@ -561,7 +598,7 @@ export default function AdminDashboard() {
                             )}
 
                             <div>
-                              <div className="text-sm font-semibold text-gray-900 line-clamp-1">
+                              <div className="text-sm font-semibold text-gray-900 line-clamp-1 group-hover:text-[#cc0000] transition">
                                 {item.title}
                               </div>
 
@@ -603,9 +640,13 @@ export default function AdminDashboard() {
                             : "-"}
                         </td>
 
-                        <td className="px-6 py-4 text-right">
+                        <td
+                          className="px-6 py-4 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
+                              type="button"
                               onClick={() => handleEdit(item)}
                               className="p-1.5 text-[#001d38] bg-gray-50 hover:bg-gray-200 rounded-lg transition"
                               title="Edit Article"
@@ -614,6 +655,7 @@ export default function AdminDashboard() {
                             </button>
 
                             <button
+                              type="button"
                               onClick={() => handleTrash(item.id)}
                               className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition"
                               title="Move to Trash"
