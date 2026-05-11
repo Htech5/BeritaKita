@@ -10,10 +10,13 @@ import {
   Trash2,
   Eye,
   Image as ImageIcon,
+  Search,
 } from "lucide-react";
 
 export default function AdminDashboard() {
   const [news, setNews] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -176,6 +179,17 @@ export default function AdminDashboard() {
       category: "THINK",
     });
   };
+
+  const filteredNews = news.filter((item) => {
+    const keyword = searchQuery.toLowerCase();
+
+    return (
+      item.title?.toLowerCase().includes(keyword) ||
+      item.content?.toLowerCase().includes(keyword) ||
+      item.category?.toLowerCase().includes(keyword) ||
+      item.createdBy?.toLowerCase().includes(keyword)
+    );
+  });
 
   const thinkCount = news.filter((n) => n.category === "THINK").length;
   const healthCount = news.filter((n) => n.category === "HEALTH").length;
@@ -437,14 +451,26 @@ export default function AdminDashboard() {
 
           <div className="xl:col-span-2">
             <div className="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
-                <h2 className="text-lg font-bold text-gray-900">
-                  Recent Articles
-                </h2>
+              <div className="px-6 py-5 border-b border-gray-100 bg-white">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Recent Articles
+                  </h2>
 
-                <button className="text-sm text-[#cc0000] font-semibold hover:text-[#a30000] transition">
-                  View All
-                </button>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-full md:w-72">
+                      <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search articles..."
+                        className="w-full border border-gray-200 pl-9 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -470,7 +496,7 @@ export default function AdminDashboard() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {news.map((item) => (
+                    {filteredNews.map((item) => (
                       <tr
                         key={item.id}
                         className="hover:bg-gray-50/80 transition group"
@@ -555,18 +581,22 @@ export default function AdminDashboard() {
                       </tr>
                     ))}
 
-                    {news.length === 0 && (
+                    {filteredNews.length === 0 && (
                       <tr>
                         <td colSpan="5" className="px-6 py-12 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-400">
                             <FileText className="w-12 h-12 mb-3 text-gray-300" />
 
                             <p className="text-base font-medium text-gray-900">
-                              No articles found
+                              {searchQuery
+                                ? "No matching articles found"
+                                : "No articles found"}
                             </p>
 
                             <p className="text-sm mt-1">
-                              Get started by creating a new article.
+                              {searchQuery
+                                ? "Try searching with another keyword."
+                                : "Get started by creating a new article."}
                             </p>
                           </div>
                         </td>
