@@ -16,6 +16,7 @@ import {
 export default function AdminDashboard() {
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -182,13 +183,14 @@ export default function AdminDashboard() {
 
   const filteredNews = news.filter((item) => {
     const keyword = searchQuery.toLowerCase();
-
-    return (
+    const matchesSearch =
       item.title?.toLowerCase().includes(keyword) ||
       item.content?.toLowerCase().includes(keyword) ||
       item.category?.toLowerCase().includes(keyword) ||
-      item.createdBy?.toLowerCase().includes(keyword)
-    );
+      item.createdBy?.toLowerCase().includes(keyword);
+    const matchesCategory =
+      categoryFilter === "ALL" || item.category === categoryFilter;
+    return matchesSearch && matchesCategory;
   });
 
   const thinkCount = news.filter((n) => n.category === "THINK").length;
@@ -234,77 +236,91 @@ export default function AdminDashboard() {
 
       <main className="p-8 max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          {/* Total Articles - clickable */}
+          <div
+            onClick={() => setCategoryFilter("ALL")}
+            className={`bg-white rounded-2xl shadow-sm border border-t-4 p-6 transition-all hover:-translate-y-1 duration-300 cursor-pointer ${categoryFilter === "ALL"
+                ? "border-[#cc0000] border-t-[#cc0000] ring-2 ring-[#cc0000]/20"
+                : "border-gray-200 border-t-[#001d38] hover:shadow-md"
+              }`}
+          >
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-[#cc0000]" />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${categoryFilter === "ALL" ? "bg-red-50" : "bg-gray-50"
+                }`}>
+                <FileText className={`w-6 h-6 ${categoryFilter === "ALL" ? "text-[#cc0000]" : "text-[#cc0000]"
+                  }`} />
               </div>
+              {categoryFilter === "ALL" && (
+                <span className="text-xs font-semibold text-[#cc0000] bg-red-50 px-2 py-0.5 rounded-full">Active</span>
+              )}
             </div>
-
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {news.length}
-              </h3>
-              <p className="text-gray-800 font-semibold mt-1">
-                Total Articles
-              </p>
+              <h3 className="text-3xl font-bold text-gray-900">{news.length}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Total Articles</p>
               <p className="text-gray-400 text-sm mt-1">All time</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          {/* Think Category - clickable */}
+          <div
+            onClick={() => setCategoryFilter("THINK")}
+            className={`bg-white rounded-2xl shadow-sm border border-t-4 p-6 transition-all hover:-translate-y-1 duration-300 cursor-pointer ${categoryFilter === "THINK"
+                ? "border-[#001d38] border-t-[#001d38] ring-2 ring-[#001d38]/20"
+                : "border-gray-200 border-t-[#001d38] hover:shadow-md"
+              }`}
+          >
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${categoryFilter === "THINK" ? "bg-[#001d38]/10" : "bg-gray-50"
+                }`}>
                 <LayoutList className="w-6 h-6 text-[#001d38]" />
               </div>
+              {categoryFilter === "THINK" && (
+                <span className="text-xs font-semibold text-[#001d38] bg-[#001d38]/10 px-2 py-0.5 rounded-full">Active</span>
+              )}
             </div>
-
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {thinkCount}
-              </h3>
-              <p className="text-gray-800 font-semibold mt-1">
-                Think Category
-              </p>
+              <h3 className="text-3xl font-bold text-gray-900">{thinkCount}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Think Category</p>
               <p className="text-gray-400 text-sm mt-1">articles published</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          {/* Health Category - clickable */}
+          <div
+            onClick={() => setCategoryFilter("HEALTH")}
+            className={`bg-white rounded-2xl shadow-sm border border-t-4 p-6 transition-all hover:-translate-y-1 duration-300 cursor-pointer ${categoryFilter === "HEALTH"
+                ? "border-[#cc0000] border-t-[#cc0000] ring-2 ring-[#cc0000]/20"
+                : "border-gray-200 border-t-[#001d38] hover:shadow-md"
+              }`}
+          >
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
-                <LayoutList className="w-6 h-6 text-[#001d38]" />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${categoryFilter === "HEALTH" ? "bg-red-50" : "bg-gray-50"
+                }`}>
+                <LayoutList className={`w-6 h-6 ${categoryFilter === "HEALTH" ? "text-[#cc0000]" : "text-[#001d38]"
+                  }`} />
               </div>
+              {categoryFilter === "HEALTH" && (
+                <span className="text-xs font-semibold text-[#cc0000] bg-red-50 px-2 py-0.5 rounded-full">Active</span>
+              )}
             </div>
-
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {healthCount}
-              </h3>
-              <p className="text-gray-800 font-semibold mt-1">
-                Health Category
-              </p>
+              <h3 className="text-3xl font-bold text-gray-900">{healthCount}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Health Category</p>
               <p className="text-gray-400 text-sm mt-1">articles published</p>
             </div>
           </div>
 
+          {/* Active Authors */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
                 <Users className="w-6 h-6 text-[#001d38]" />
               </div>
             </div>
-
             <div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {uniqueAuthors || 1}
-              </h3>
-              <p className="text-gray-800 font-semibold mt-1">
-                Active Authors
-              </p>
-              <p className="text-gray-400 text-sm mt-1">
-                contributing writers
-              </p>
+              <h3 className="text-3xl font-bold text-gray-900">{uniqueAuthors || 1}</h3>
+              <p className="text-gray-800 font-semibold mt-1">Active Authors</p>
+              <p className="text-gray-400 text-sm mt-1">contributing writers</p>
             </div>
           </div>
         </div>
@@ -453,14 +469,57 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 bg-white">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <h2 className="text-lg font-bold text-gray-900">
-                    Recent Articles
-                  </h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-bold text-gray-900">
+                      {categoryFilter === "ALL"
+                        ? "All Articles"
+                        : categoryFilter === "THINK"
+                          ? "Think Category Articles"
+                          : "Health Category Articles"}
+                    </h2>
+                    {categoryFilter !== "ALL" && (
+                      <button
+                        onClick={() => setCategoryFilter("ALL")}
+                        className="text-xs text-gray-500 bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-full transition flex items-center gap-1"
+                      >
+                        <span>×</span> Clear filter
+                      </button>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-3">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setCategoryFilter("ALL")}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${categoryFilter === "ALL"
+                            ? "bg-gray-900 text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                      >
+                        All
+                      </button>
+                      <button
+                        onClick={() => setCategoryFilter("THINK")}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${categoryFilter === "THINK"
+                            ? "bg-[#001d38] text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                      >
+                        Think
+                      </button>
+                      <button
+                        onClick={() => setCategoryFilter("HEALTH")}
+                        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${categoryFilter === "HEALTH"
+                            ? "bg-[#cc0000] text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          }`}
+                      >
+                        Health
+                      </button>
+                    </div>
+
                     <div className="relative w-full md:w-72">
                       <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-
                       <input
                         type="text"
                         value={searchQuery}
@@ -530,11 +589,10 @@ export default function AdminDashboard() {
 
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                              item.category === "THINK"
+                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${item.category === "THINK"
                                 ? "bg-gray-50 text-[#001d38]"
                                 : "bg-gray-50 text-[#cc0000]"
-                            }`}
+                              }`}
                           >
                             {item.category}
                           </span>
@@ -549,13 +607,13 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {item.createdAt
                             ? new Date(item.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                }
-                              )
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )
                             : "-"}
                         </td>
 
@@ -586,17 +644,19 @@ export default function AdminDashboard() {
                         <td colSpan="5" className="px-6 py-12 text-center">
                           <div className="flex flex-col items-center justify-center text-gray-400">
                             <FileText className="w-12 h-12 mb-3 text-gray-300" />
-
                             <p className="text-base font-medium text-gray-900">
                               {searchQuery
                                 ? "No matching articles found"
-                                : "No articles found"}
+                                : categoryFilter !== "ALL"
+                                  ? `No articles in ${categoryFilter} category`
+                                  : "No articles found"}
                             </p>
-
                             <p className="text-sm mt-1">
                               {searchQuery
                                 ? "Try searching with another keyword."
-                                : "Get started by creating a new article."}
+                                : categoryFilter !== "ALL"
+                                  ? "Try selecting a different category."
+                                  : "Get started by creating a new article."}
                             </p>
                           </div>
                         </td>
