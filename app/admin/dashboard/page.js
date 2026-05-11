@@ -16,6 +16,7 @@ import {
 export default function AdminDashboard() {
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -183,12 +184,16 @@ export default function AdminDashboard() {
   const filteredNews = news.filter((item) => {
     const keyword = searchQuery.toLowerCase();
 
-    return (
+    const matchSearch =
       item.title?.toLowerCase().includes(keyword) ||
       item.content?.toLowerCase().includes(keyword) ||
       item.category?.toLowerCase().includes(keyword) ||
-      item.createdBy?.toLowerCase().includes(keyword)
-    );
+      item.createdBy?.toLowerCase().includes(keyword);
+
+    const matchCategory =
+      categoryFilter === "ALL" || item.category === categoryFilter;
+
+    return matchSearch && matchCategory;
   });
 
   const thinkCount = news.filter((n) => n.category === "THINK").length;
@@ -234,7 +239,14 @@ export default function AdminDashboard() {
 
       <main className="p-8 max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          <div
+            onClick={() => setCategoryFilter("ALL")}
+            className={`bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 p-6 transition-transform hover:-translate-y-1 duration-300 cursor-pointer ${
+              categoryFilter === "ALL"
+                ? "border-t-[#cc0000] ring-2 ring-[#cc0000]/20"
+                : "border-t-[#001d38]"
+            }`}
+          >
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
                 <FileText className="w-6 h-6 text-[#cc0000]" />
@@ -252,7 +264,14 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          <div
+            onClick={() => setCategoryFilter("THINK")}
+            className={`bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 p-6 transition-transform hover:-translate-y-1 duration-300 cursor-pointer ${
+              categoryFilter === "THINK"
+                ? "border-t-[#cc0000] ring-2 ring-[#cc0000]/20"
+                : "border-t-[#001d38]"
+            }`}
+          >
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
                 <LayoutList className="w-6 h-6 text-[#001d38]" />
@@ -270,7 +289,14 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 border-t-[#001d38] p-6 transition-transform hover:-translate-y-1 duration-300">
+          <div
+            onClick={() => setCategoryFilter("HEALTH")}
+            className={`bg-white rounded-2xl shadow-sm border border-gray-200 border-t-4 p-6 transition-transform hover:-translate-y-1 duration-300 cursor-pointer ${
+              categoryFilter === "HEALTH"
+                ? "border-t-[#cc0000] ring-2 ring-[#cc0000]/20"
+                : "border-t-[#001d38]"
+            }`}
+          >
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
                 <LayoutList className="w-6 h-6 text-[#001d38]" />
@@ -469,8 +495,26 @@ export default function AdminDashboard() {
                         className="w-full border border-gray-200 pl-9 pr-4 py-2.5 rounded-xl focus:ring-2 focus:ring-[#001d38]/20 focus:border-[#001d38] transition-all text-sm"
                       />
                     </div>
+
+                    {categoryFilter !== "ALL" && (
+                      <button
+                        onClick={() => setCategoryFilter("ALL")}
+                        className="text-sm font-semibold text-[#cc0000] hover:underline"
+                      >
+                        Reset Filter
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Showing:{" "}
+                  <span className="font-semibold text-gray-800">
+                    {categoryFilter === "ALL"
+                      ? "All Articles"
+                      : `${categoryFilter} Articles`}
+                  </span>
+                </p>
               </div>
 
               <div className="overflow-x-auto">
