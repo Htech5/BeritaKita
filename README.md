@@ -1,36 +1,161 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📰 BeritaKita
 
-## Getting Started
+BeritaKita adalah platform portal berita modern yang memungkinkan administrator mengelola konten berita secara efisien dan pengguna membaca serta berinteraksi melalui fitur komentar.
 
-First, run the development server:
+==================================================
+FITUR UTAMA
+==================================================
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+USER
+- Melihat daftar berita terbaru
+- Membaca detail berita
+- Mencari berita berdasarkan kata kunci
+- Memberikan komentar pada berita
+- Melihat komentar pengguna lain
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ADMIN
+- Login ke dashboard admin
+- Mengelola berita (CRUD)
+- Membuat berita baru
+- Mengedit berita
+- Menghapus berita
+- Mengubah status berita menjadi Draft atau Published
+- Mengelola komentar pengguna
+- Upload gambar berita
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+MULTI ADMIN
+- Mendukung 2 admin atau lebih
+- Setiap admin dapat membuat dan mengelola berita
+- Pengelolaan konten dilakukan secara terpusat
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+MANAJEMEN BERITA
+- Create News
+- Read News
+- Update News
+- Delete News
+- Draft News
+- Publish News
+- Search News
+- Dynamic News Detail (/news/[slug])
+- Upload Thumbnail/Gambar Berita
 
-## Learn More
+SISTEM KOMENTAR
+- User dapat memberikan komentar pada berita
+- Komentar tersimpan ke database
+- Admin dapat memoderasi komentar
 
-To learn more about Next.js, take a look at the following resources:
+PENCARIAN BERITA
+- Berdasarkan judul berita
+- Berdasarkan kata kunci
+- Berdasarkan isi berita
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+==================================================
+STRUKTUR PROJECT
+==================================================
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+app
+├── admin
+├── api
+│   ├── admin/login
+│   ├── comments
+│   ├── news
+│   ├── seed
+│   └── upload
+├── components
+├── news/[slug]
+├── favicon.ico
+├── globals.css
+├── layout.js
+└── page.js
 
-## Deploy on Vercel
+lib
+└── prisma.js
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+==================================================
+TECH STACK
+==================================================
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Frontend:
+- Next.js
+- React.js
+- App Router
+- Tailwind CSS
+
+Backend:
+- Next.js API Routes
+- Prisma ORM
+
+Database:
+- MySQL / PostgreSQL
+
+Authentication:
+- Admin Login Authentication
+
+Storage:
+- Local Upload Storage
+
+==================================================
+STATUS BERITA
+==================================================
+
+Draft
+- Berita disimpan tetapi belum tampil ke publik
+
+Published
+- Berita tampil dan dapat dibaca pengguna
+
+==================================================
+ALUR KERJA
+==================================================
+
+Admin Login
+    ↓
+Buat Berita
+    ↓
+Simpan sebagai Draft
+    ↓
+Review Konten
+    ↓
+Publish
+    ↓
+Tampil di Website
+    ↓
+User Membaca & Berkomentar
+
+==================================================
+FITUR SELESAI
+==================================================
+
+✅ Multi Admin Login
+✅ CRUD Berita
+✅ Draft & Publish Berita
+✅ Upload Gambar Berita
+✅ Dynamic Slug News
+✅ Komentar Pengguna
+✅ Search Berita
+✅ API Routes
+✅ Prisma ORM Integration
+
+==================================================
+PENGEMBANGAN SELANJUTNYA
+==================================================
+
+- Role Based Access Control
+- Rich Text Editor
+- Kategori Berita
+- Tag Berita
+- Pagination
+- Dashboard Analytics
+- Notifikasi Komentar
+- SEO Optimization
+- Dark Mode
+- Bookmark Berita
+- Like & Share Berita
+
+==================================================
+AUTHOR
+==================================================
+
+Habib
+
+BeritaKita — Portal Berita Modern, Cepat, dan Interaktif untuk Semua.
